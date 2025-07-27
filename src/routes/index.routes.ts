@@ -1,4 +1,6 @@
 import { Router } from "express";
+import user from "../modules/users/user.routes";
+import auth from "../modules/auth/auth.routes";
 
 const router = Router();
 
@@ -9,5 +11,8 @@ router.get("/", (req, res) => {
     documentation: "",
   });
 });
+
+router.use("/auth", auth);
+router.use("/user", user);
 
 export default router;
