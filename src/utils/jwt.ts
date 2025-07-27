@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 const sign = (payload: object, secret: string, options?: object): string => {
   return jwt.sign(payload, secret, options);
