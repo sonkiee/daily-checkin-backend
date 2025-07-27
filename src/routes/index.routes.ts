@@ -1,6 +1,7 @@
 import { Router } from "express";
 import user from "../modules/users/user.routes";
 import auth from "../modules/auth/auth.routes";
+import checkins from "../modules/checkins/checkings.routes";
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.get("/", (req, res) => {
 
 router.use("/auth", auth);
 router.use("/user", user);
+router.use("/user", checkins);
 
 export default router;
