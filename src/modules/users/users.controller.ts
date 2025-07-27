@@ -11,13 +11,9 @@ export const create = async (req: Request, res: Response) => {
   }
 
   try {
-    let existing: User | null = null;
-
-    if (newUser.id) {
-      existing = await usersService.findById(newUser.id);
-    } else if (newUser.deviceId) {
-      existing = await usersService.findByDeviceId(newUser.deviceId);
-    }
+    const existing = newUser.id
+      ? await usersService.findById(newUser.id)
+      : await usersService.findByDeviceId(newUser.deviceId!);
 
     if (existing) {
       return res.status(409).json({ error: "User already exists" });
