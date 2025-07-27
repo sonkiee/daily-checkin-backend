@@ -23,11 +23,12 @@ class UserService {
       .set(userData)
       .where(eq(Users.id, id))
       .returning();
-    return updatedUser || null;
+    return updatedUser ?? null;
   }
 
-  async delete(id: string): Promise<void> {
-    await db.delete(Users).where(eq(Users.id, id));
+  async delete(id: string): Promise<boolean> {
+    const result = await db.delete(Users).where(eq(Users.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 }
 
