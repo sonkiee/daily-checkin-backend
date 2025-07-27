@@ -9,113 +9,101 @@ export const checkinsService = {
   // Atomic checkin creation with user points update
   createCheckinWithPointsUpdate: async (userId: string) => {
     return await db.transaction(async (tx) => {
-      try {
-        // 1. Check if user already checked in today (within transaction)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+      // 1. Check if user already checked in today (within transaction)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-        const startOfDay = new Date(today);
-        const endOfDay = new Date(today);
-        endOfDay.setHours(23, 59, 59, 999);
+      const startOfDay = new Date(today);
+      const endOfDay = new Date(today);
+      endOfDay.setHours(23, 59, 59, 999);
 
-        const [existingCheckin] = await tx
-          .select()
-          .from(Checkins)
-          .where(
-            and(
-              eq(Checkins.userId, userId),
-              gte(Checkins.checkinDate, startOfDay),
-              lt(Checkins.checkinDate, endOfDay)
-            )
+      const [existingCheckin] = await tx
+        .select()
+        .from(Checkins)
+        .where(
+          and(
+            eq(Checkins.userId, userId),
+            gte(Checkins.checkinDate, startOfDay),
+            lt(Checkins.checkinDate, endOfDay)
           )
-          .limit(1);
+        )
+        .limit(1);
 
-        if (existingCheckin) {
-          return {
-            success: false,
-            message: "Already checked in today",
-            data: existingCheckin,
-          };
-        }
-
-        // 2. Get current user data (within transaction for consistency)
-        const [user] = await tx
-          .select()
-          .from(Users)
-          .where(eq(Users.id, userId))
-          .limit(1);
-
-        if (!user) {
-          return {
-            success: false,
-            message: "User not found",
-            data: null,
-          };
-        }
-
-        // 3. Calculate streak and points
-        const streakData = calculateStreak(
-          user.lastCheckin,
-          user.currentStreak
-        );
-        const pointsEarned = calculatePoints(streakData.newStreak);
-        const bonusMultiplier = calculateBonusMultiplier(streakData.newStreak);
-
-        // 4. Create checkin record (within transaction)
-        const checkinData = {
-          id: crypto.randomUUID(),
-          userId,
-          checkinDate: new Date(),
-          pointsEarned,
-          streakDay: streakData.newStreak,
-          bonusMultiplier,
-        };
-
-        const [newCheckin] = await tx
-          .insert(Checkins)
-          .values(checkinData)
-          .returning();
-
-        // 5. Update user's profile (within same transaction)
-        const [updatedUser] = await tx
-          .update(Users)
-          .set({
-            totalPoints: user.totalPoints + pointsEarned,
-            currentStreak: streakData.newStreak,
-            longestStreak: Math.max(user.longestStreak, streakData.newStreak),
-            lastCheckin: new Date(),
-            updatedAt: new Date(),
-          })
-          .where(eq(Users.id, userId))
-          .returning();
-
-        // 6. Return success with both checkin and user data
+      if (existingCheckin) {
         return {
-          success: true,
-          message: "Check-in successful!",
-          data: {
-            checkin: newCheckin,
-            user: {
-              totalPoints: updatedUser.totalPoints,
-              currentStreak: updatedUser.currentStreak,
-              longestStreak: updatedUser.longestStreak,
-              pointsEarned,
-            },
-            streakInfo: {
-              isNewStreak: streakData.newStreak === 1,
-              streakBroken: streakData.streakBroken,
-              bonusMultiplier,
-            },
-          },
+          success: false,
+          message: "Already checked in today",
+          data: existingCheckin,
         };
-      } catch (error) {
-        // Transaction will automatically rollback on any error
-        console.error(
-          "Transaction error in createCheckinWithPointsUpdate:",
-          error
-        );
-        throw error; // Re-throw to trigger rollback
       }
+
+      // 2. Get current user data (within transaction for consistency)
+      const [user] = await tx
+        .select()
+        .from(Users)
+        .where(eq(Users.id, userId))
+        .limit(1);
+
+      if (!user) {
+        return {
+          success: false,
+          message: "User not found",
+          data: null,
+        };
+      }
+
+      // 3. Calculate streak and points
+      const streakData = calculateStreak(user.lastCheckin, user.currentStreak);
+      const pointsEarned = calculatePoints(streakData.newStreak);
+      const bonusMultiplier = calculateBonusMultiplier(streakData.newStreak);
+
+      // 4. Create checkin record (within transaction)
+      const checkinData = {
+        id: crypto.randomUUID(),
+        userId,
+        checkinDate: new Date(),
+        pointsEarned,
+        streakDay: streakData.newStreak,
+        bonusMultiplier,
+      };
+
+      const [newCheckin] = await tx
+        .insert(Checkins)
+        .values(checkinData)
+        .returning();
+
+      // 5. Update user's profile (within same transaction)
+      const [updatedUser] = await tx
+        .update(Users)
+        .set({
+          totalPoints: user.totalPoints + pointsEarned,
+          currentStreak: streakData.newStreak,
+          longestStreak: Math.max(user.longestStreak, streakData.newStreak),
+          lastCheckin: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(Users.id, userId))
+        .returning();
+
+      // 6. Return success with both checkin and user data
+      return {
+        success: true,
+        message: "Check-in successful!",
+        data: {
+          checkin: newCheckin,
+          user: {
+            totalPoints: updatedUser.totalPoints,
+            currentStreak: updatedUser.currentStreak,
+            longestStreak: updatedUser.longestStreak,
+            pointsEarned,
+          },
+          streakInfo: {
+            isNewStreak: streakData.newStreak === 1,
+            streakBroken: streakData.streakBroken,
+            bonusMultiplier,
+          },
+        },
+      };
     });
   },
   // Existing methods...
