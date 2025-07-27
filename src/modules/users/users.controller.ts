@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { NewUser, User } from "./users.schema";
 import { userService } from "./users.service";
+import jwt from "../../utils/jwt";
 
 export const create = async (req: Request, res: Response) => {
   const newUser: NewUser = req.body;
@@ -23,6 +24,12 @@ export const create = async (req: Request, res: Response) => {
     }
 
     const createdUser: User = await userService.create(newUser);
+
+    const token = jwt.sign({
+      id: createdUser.id,
+      deviceId: createdUser.deviceId,
+    });
+    res.setHeader("Authorization", `Bearer ${token}`);
     res.status(201).json(createdUser);
   } catch (error) {
     console.error("Error creating user:", error);
