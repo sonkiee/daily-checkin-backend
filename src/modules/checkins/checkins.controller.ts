@@ -3,6 +3,15 @@ import { checkinsService } from "./checkins.service";
 import { usersService } from "../users/users.service"; // Assuming you have this
 import { AuthRequest } from "../../middleware/auth.middleware";
 
+const requireUserId = (req: AuthRequest, res: Response): string | undefined => {
+  const userId = req.user?.id;
+  if (!userId) {
+    res.status(401).json({ success: false, message: "Unauthorized" });
+    return undefined;
+  }
+  return userId;
+};
+
 const getAll = async (req: Request, res: Response) => {
   try {
     const checkins = await checkinsService.findAll();
@@ -46,16 +55,10 @@ const getById = async (req: Request, res: Response) => {
 };
 
 const getByUser = async (req: AuthRequest, res: Response) => {
-  try {
-    // Use authenticated user's ID instead of params for security
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-    }
+  const userId = requireUserId(req, res);
+  if (!userId) return;
 
+  try {
     const checkins = await checkinsService.findByUser(userId);
     return res.json({
       success: true,
@@ -71,15 +74,9 @@ const getByUser = async (req: AuthRequest, res: Response) => {
 };
 
 const getUserStreak = async (req: AuthRequest, res: Response) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-    }
-
     const user = await usersService.findById(userId);
     if (!user) {
       return res.status(404).json({
