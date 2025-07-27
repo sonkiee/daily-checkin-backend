@@ -12,6 +12,14 @@ class UserService {
     return user ?? null;
   }
 
+  async findByDeviceId(deviceId: string): Promise<User | null> {
+    const [user] = await db
+      .select()
+      .from(Users)
+      .where(eq(Users.deviceId, deviceId));
+    return user ?? null;
+  }
+
   async create(user: NewUser): Promise<User> {
     const [newUser] = await db.insert(Users).values(user).returning();
     return newUser;

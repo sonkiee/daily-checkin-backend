@@ -5,16 +5,27 @@ import { userService } from "./users.service";
 export const create = async (req: Request, res: Response) => {
   const newUser: NewUser = req.body;
 
+  if (!newUser.id && !newUser.deviceId) {
+    return res.status(400).json({ error: "Missing id or deviceId" });
+  }
+
   try {
-    const existing = await userService.findById(newUser.id);
+    let existing: User | null = null;
+
+    if (newUser.id) {
+      existing = await userService.findById(newUser.id);
+    } else if (newUser.deviceId) {
+      existing = await userService.findByDeviceId(newUser.deviceId);
+    }
+
     if (existing) {
-      return res.status(400).json({ error: "User already exists" });
+      return res.status(409).json({ error: "User already exists" });
     }
 
     const createdUser: User = await userService.create(newUser);
     res.status(201).json(createdUser);
   } catch (error) {
-    console.log("Error creating user:", error);
+    console.error("Error creating user:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
