@@ -21,5 +21,15 @@ export const Users = pgTable("users", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const UserSettings = pgTable("user_settings", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => Users.id, { onDelete: "cascade" }),
+  checkinReminder: boolean("checkin_reminder").default(true),
+  darkMode: boolean("dark_mode").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export type Users = InferSelectModel<typeof Users>;
 export type NewUser = InferInsertModel<typeof Users>;
