@@ -104,15 +104,9 @@ const getUserStreak = async (req: AuthRequest, res: Response) => {
 };
 
 const getTodayStatus = async (req: AuthRequest, res: Response) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
   try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-    }
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -135,14 +129,8 @@ const getTodayStatus = async (req: AuthRequest, res: Response) => {
 };
 
 const create = async (req: AuthRequest, res: Response) => {
-  const userId = req.user?.id;
-
-  if (!userId) {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-  }
+  const userId = requireUserId(req, res);
+  if (!userId) return;
 
   try {
     // Use atomic transaction for checkin creation
