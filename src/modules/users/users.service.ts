@@ -8,8 +8,8 @@ class UserService {
   }
 
   async findById(id: string): Promise<User | null> {
-    const user = await db.select().from(Users).where(eq(Users.id, id));
-    return user.length > 0 ? user[0] : null;
+    const [user] = await db.select().from(Users).where(eq(Users.id, id));
+    return user ?? null;
   }
 
   async create(user: NewUser): Promise<User> {
