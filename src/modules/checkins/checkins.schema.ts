@@ -17,5 +17,5 @@ export const Checkins = pgTable("checkins", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export type Checkins = InferSelectModel<typeof Checkins>;
+export type Checkin = InferSelectModel<typeof Checkins>;
 export type NewCheckin = InferInsertModel<typeof Checkins>;
