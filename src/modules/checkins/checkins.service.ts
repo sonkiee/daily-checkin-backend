@@ -112,95 +112,65 @@ export const checkinsService = {
     userId: string,
     date: Date
   ): Promise<Checkin | null> => {
-    try {
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
 
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
 
-      const [checkin] = await db
-        .select()
-        .from(Checkins)
-        .where(
-          and(
-            eq(Checkins.userId, userId),
-            gte(Checkins.checkinDate, startOfDay),
-            lt(Checkins.checkinDate, endOfDay)
-          )
+    const [checkin] = await db
+      .select()
+      .from(Checkins)
+      .where(
+        and(
+          eq(Checkins.userId, userId),
+          gte(Checkins.checkinDate, startOfDay),
+          lt(Checkins.checkinDate, endOfDay)
         )
-        .limit(1);
+      )
+      .limit(1);
 
-      return checkin || null;
-    } catch (error) {
-      console.error("Error finding checkin by user and date:", error);
-      throw error;
-    }
+    return checkin || null;
   },
 
   findByUser: async (userId: string): Promise<Checkin[]> => {
-    try {
-      return await db
-        .select()
-        .from(Checkins)
-        .where(eq(Checkins.userId, userId))
-        .orderBy(Checkins.checkinDate);
-    } catch (error) {
-      console.error("Error finding checkins by user:", error);
-      throw error;
-    }
+    return await db
+      .select()
+      .from(Checkins)
+      .where(eq(Checkins.userId, userId))
+      .orderBy(Checkins.checkinDate);
   },
 
   findAll: async (): Promise<Checkin[]> => {
-    try {
-      return await db.select().from(Checkins).orderBy(Checkins.createdAt);
-    } catch (error) {
-      console.error("Error finding all checkins:", error);
-      throw error;
-    }
+    return await db.select().from(Checkins).orderBy(Checkins.createdAt);
   },
 
   findById: async (id: string): Promise<Checkin | null> => {
-    try {
-      const [checkin] = await db
-        .select()
-        .from(Checkins)
-        .where(eq(Checkins.id, id))
-        .limit(1);
+    const [checkin] = await db
+      .select()
+      .from(Checkins)
+      .where(eq(Checkins.id, id))
+      .limit(1);
 
-      return checkin || null;
-    } catch (error) {
-      console.error("Error finding checkin by id:", error);
-      throw error;
-    }
+    return checkin || null;
   },
 
   create: async (checkinData: NewCheckin): Promise<Checkin> => {
-    try {
-      const [newCheckin] = await db
-        .insert(Checkins)
-        .values({
-          ...checkinData,
-          id: crypto.randomUUID(), // Generate UUID
-        })
-        .returning();
+    const [newCheckin] = await db
+      .insert(Checkins)
+      .values({
+        ...checkinData,
+        id: crypto.randomUUID(), // Generate UUID
+      })
+      .returning();
 
-      return newCheckin;
-    } catch (error) {
-      console.error("Error creating checkin:", error);
-      throw error;
-    }
+    return newCheckin;
   },
 
   delete: async (id: string): Promise<boolean> => {
-    try {
-      const result = await db.delete(Checkins).where(eq(Checkins.id, id));
+    const result = await db.delete(Checkins).where(eq(Checkins.id, id));
 
-      return (result.rowCount ?? 0) > 0;
-    } catch (error) {
-      console.error("Error deleting checkin:", error);
-      throw error;
-    }
+    return (result.rowCount ?? 0) > 0;
   },
 
   // Get user's checkin history with pagination
@@ -209,18 +179,13 @@ export const checkinsService = {
     limit: number = 20,
     offset: number = 0
   ): Promise<Checkin[]> => {
-    try {
-      return await db
-        .select()
-        .from(Checkins)
-        .where(eq(Checkins.userId, userId))
-        .orderBy(Checkins.checkinDate)
-        .limit(limit)
-        .offset(offset);
-    } catch (error) {
-      console.error("Error finding paginated checkins:", error);
-      throw error;
-    }
+    return await db
+      .select()
+      .from(Checkins)
+      .where(eq(Checkins.userId, userId))
+      .orderBy(Checkins.checkinDate)
+      .limit(limit)
+      .offset(offset);
   },
 
   // Get recent checkins for a user (last N days)
@@ -228,24 +193,16 @@ export const checkinsService = {
     userId: string,
     days: number = 30
   ): Promise<Checkin[]> => {
-    try {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - days);
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
 
-      return await db
-        .select()
-        .from(Checkins)
-        .where(
-          and(
-            eq(Checkins.userId, userId),
-            gte(Checkins.checkinDate, cutoffDate)
-          )
-        )
-        .orderBy(Checkins.checkinDate);
-    } catch (error) {
-      console.error("Error finding recent checkins:", error);
-      throw error;
-    }
+    return await db
+      .select()
+      .from(Checkins)
+      .where(
+        and(eq(Checkins.userId, userId), gte(Checkins.checkinDate, cutoffDate))
+      )
+      .orderBy(Checkins.checkinDate);
   },
 };
 
