@@ -12,7 +12,7 @@ export const usersService = {
       .where(eq(Users.id, id))
       .limit(1);
 
-    return user || null;
+    return user ?? null;
   },
 
   findByDeviceId: async (deviceId: string): Promise<User | null> => {
@@ -22,7 +22,7 @@ export const usersService = {
       .where(eq(Users.deviceId, deviceId))
       .limit(1);
 
-    return user || null;
+    return user ?? null;
   },
 
   create: async (userData: NewUser): Promise<User> => {
@@ -47,10 +47,7 @@ export const usersService = {
       .where(eq(Users.id, id))
       .returning();
 
-    if (!updatedUser) {
-      throw new Error("User not found");
-    }
-
+    if (!updatedUser) throw new Error("User not found");
     return updatedUser;
   },
 
@@ -94,9 +91,7 @@ export const usersService = {
       .where(eq(Users.id, id))
       .returning();
 
-    if (!updatedUser) {
-      throw new Error("User not found");
-    }
+    if (!updatedUser) throw new Error("User not found");
 
     return updatedUser;
   },
