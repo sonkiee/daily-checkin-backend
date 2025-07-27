@@ -30,7 +30,13 @@ export const create = async (req: Request, res: Response) => {
       deviceId: createdUser.deviceId,
     });
     res.setHeader("Authorization", `Bearer ${token}`);
-    res.status(201).json(createdUser);
+    res.status(201).json({
+      success: true,
+      data: {
+        user: createdUser,
+        token: token,
+      },
+    });
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).json({ error: "Internal server error" });
