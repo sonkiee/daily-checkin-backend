@@ -25,7 +25,7 @@ export const create = async (req: Request, res: Response) => {
 
     const createdUser: User = await userService.create(newUser);
 
-    const token = jwt.sign({
+    const token = jwt.generate({
       id: createdUser.id,
       deviceId: createdUser.deviceId,
     });
