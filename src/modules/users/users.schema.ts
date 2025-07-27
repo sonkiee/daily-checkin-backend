@@ -31,5 +31,5 @@ export const UserSettings = pgTable("user_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export type Users = InferSelectModel<typeof Users>;
+export type User = InferSelectModel<typeof Users>;
 export type NewUser = InferInsertModel<typeof Users>;
