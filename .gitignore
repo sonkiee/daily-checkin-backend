@@ -34,3 +34,9 @@ Thumbs.db
 # Optional cache dirs
 .cache/
 .next/
+
+
+# Optional: Ignore database files if any local dev DB is dumped here
+*.sqlite
+*.db
+node_modules/
