@@ -1,4 +1,4 @@
-import jwt, { JwtPayload as Payload, TokenExpiredError } from "jsonwebtoken";
+import jwt, { JwtPayload as Payload } from "jsonwebtoken";
 import "dotenv/config";
 
 interface JwtPayload extends Payload {
@@ -20,34 +20,8 @@ const generate = (payload: JwtPayload) => {
   };
 };
 
-const verify = (
-  token: string
-): {
-  valid: boolean;
-  expired: boolean;
-  decoded?: JwtPayload;
-} => {
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET as string);
-
-    if (typeof decoded === "object" && decoded !== null && "id" in decoded) {
-      return {
-        valid: true,
-        expired: false,
-        decoded: decoded as JwtPayload,
-      };
-    }
-
-    return {
-      valid: false,
-      expired: false,
-    };
-  } catch (error) {
-    return {
-      valid: false,
-      expired: error instanceof TokenExpiredError,
-    };
-  }
+const verify = (token: string): JwtPayload => {
+  return jwt.verify(token, JWT_SECRET) as JwtPayload;
 };
 
 export default { generate, verify };
