@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload, TokenExpiredError } from "jsonwebtoken";
 import "dotenv/config";
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -12,8 +12,26 @@ const sign = (payload: object): string => {
   });
 };
 
-const verify = (token: string): object | string => {
-  return jwt.verify(token, JWT_SECRET as string);
+const verify = (
+  token: string
+): {
+  valid: boolean;
+  expired: boolean;
+  decoded?: JwtPayload | string;
+} => {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET as string);
+    return {
+      valid: true,
+      expired: false,
+      decoded: decoded,
+    };
+  } catch (error) {
+    return {
+      valid: false,
+      expired: error instanceof TokenExpiredError,
+    };
+  }
 };
 
 export default { sign, verify };
