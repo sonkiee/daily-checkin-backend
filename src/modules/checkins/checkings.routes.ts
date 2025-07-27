@@ -9,8 +9,6 @@ import {
 
 const router = Router();
 
-router.get("/");
-
 router.get("/", getAll);
 router.get("/:id", getById);
 

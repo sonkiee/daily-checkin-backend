@@ -15,6 +15,6 @@ router.get("/", (req, res) => {
 
 router.use("/auth", auth);
 router.use("/user", user);
-router.use("/user", checkins);
+router.use("/checkins", checkins);
 
 export default router;
