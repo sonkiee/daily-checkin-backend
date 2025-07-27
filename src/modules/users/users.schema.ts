@@ -1,7 +1,5 @@
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
-import { timestamp } from "drizzle-orm/gel-core";
-
-import { pgTable, uuid, varchar } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, timestamp } from "drizzle-orm/pg-core"; // ✅ Correct import
 
 const Users = pgTable("users", {
   id: uuid("id").primaryKey(),
