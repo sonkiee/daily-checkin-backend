@@ -26,6 +26,7 @@ export const UserSettings = pgTable("user_settings", {
     .primaryKey()
     .references(() => Users.id, { onDelete: "cascade" }),
   checkinReminder: boolean("checkin_reminder").default(true),
+  allowNotifications: boolean("allow_notifications").default(true),
   darkMode: boolean("dark_mode").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
