@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "../utils/jwt";
 import { User } from "../modules/users/users.schema";
-import { userService } from "../modules/users/users.service";
+import { usersService } from "../modules/users/users.service";
 
 interface AuthRequest extends Request {
   user?: User;
@@ -27,7 +27,7 @@ const authenticate = async (
     }
 
     const decoded = jwt.verify(token);
-    const user = await userService.findById(decoded.id);
+    const user = await usersService.findById(decoded.id);
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }

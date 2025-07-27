@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { NewUser, User } from "./users.schema";
-import { userService } from "./users.service";
+import { usersService } from "./users.service";
 import jwt from "../../utils/jwt";
 
 export const create = async (req: Request, res: Response) => {
@@ -14,16 +14,16 @@ export const create = async (req: Request, res: Response) => {
     let existing: User | null = null;
 
     if (newUser.id) {
-      existing = await userService.findById(newUser.id);
+      existing = await usersService.findById(newUser.id);
     } else if (newUser.deviceId) {
-      existing = await userService.findByDeviceId(newUser.deviceId);
+      existing = await usersService.findByDeviceId(newUser.deviceId);
     }
 
     if (existing) {
       return res.status(409).json({ error: "User already exists" });
     }
 
-    const createdUser: User = await userService.create(newUser);
+    const createdUser: User = await usersService.create(newUser);
 
     const token = jwt.generate({
       id: createdUser.id,
