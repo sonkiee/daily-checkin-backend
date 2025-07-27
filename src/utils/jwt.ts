@@ -12,6 +12,12 @@ const sign = (payload: object): string => {
   });
 };
 
+const refresh = (payload: object): string => {
+  return jwt.sign(payload, JWT_SECRET as string, {
+    expiresIn: "15min",
+  });
+};
+
 const verify = (
   token: string
 ): {
@@ -34,4 +40,4 @@ const verify = (
   }
 };
 
-export default { sign, verify };
+export default { sign, verify, refresh };
