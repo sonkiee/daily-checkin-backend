@@ -7,7 +7,7 @@ export const create = async (req: Request, res: Response) => {
   const newUser: NewUser = req.body;
 
   if (!newUser.deviceId) {
-    return res.status(400).json({ error: "Missing id or deviceId" });
+    return res.status(400).json({ error: "Missing deviceId" });
   }
 
   try {

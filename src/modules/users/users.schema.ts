@@ -9,7 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const Users = pgTable("users", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   deviceId: varchar("device_id", { length: 64 }).notNull().unique(),
   totalPoints: integer("total_points").notNull().default(0),
   currentStreak: integer("current_streak").notNull().default(0),
