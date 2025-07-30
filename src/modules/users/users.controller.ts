@@ -6,14 +6,12 @@ import jwt from "../../utils/jwt";
 export const create = async (req: Request, res: Response) => {
   const newUser: NewUser = req.body;
 
-  if (!newUser.id && !newUser.deviceId) {
+  if (!newUser.deviceId) {
     return res.status(400).json({ error: "Missing id or deviceId" });
   }
 
   try {
-    const existing = newUser.id
-      ? await usersService.findById(newUser.id)
-      : await usersService.findByDeviceId(newUser.deviceId!);
+    const existing = await usersService.findByDeviceId(newUser.deviceId!);
 
     if (existing) {
       return res.status(409).json({ error: "User already exists" });
