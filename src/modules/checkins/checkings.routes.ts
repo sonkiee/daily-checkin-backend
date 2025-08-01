@@ -5,6 +5,7 @@ import {
   getById,
   getByUser,
   remove,
+  completeAdReward,
 } from "./checkins.controller";
 import { authenticate } from "../../middleware/auth.middleware";
 
@@ -16,6 +17,7 @@ router.get("/:id", getById);
 // User-specific (auth required)
 router.get("/user/:userId", getByUser);
 router.post("/", authenticate, create);
+router.post("/ad-reward", authenticate, completeAdReward);
 router.delete("/:id", remove);
 
 export default router;
