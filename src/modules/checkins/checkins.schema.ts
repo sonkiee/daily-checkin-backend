@@ -1,5 +1,11 @@
 import { InferInsertModel, InferSelectModel } from "drizzle-orm";
-import { integer, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  pgTable,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { Users } from "../users/users.schema";
 
 export const Checkins = pgTable("checkins", {
@@ -13,6 +19,8 @@ export const Checkins = pgTable("checkins", {
   pointsEarned: integer("points_earned").notNull().default(0),
   streakDay: integer("streak_day").notNull().default(0),
   bonusMultiplier: integer("bonus_multiplier").notNull().default(1),
+  adWatched: boolean("ad_watched").notNull().default(false),
+  adRewardClaimed: boolean("ad_reward_claimed").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

@@ -54,16 +54,18 @@ export const checkinsService = {
 
       // 3. Calculate streak and points
       const streakData = calculateStreak(user.lastCheckin, user.currentStreak);
-      const pointsEarned = calculatePoints(streakData.newStreak);
+      const basePoints = calculatePoints(streakData.newStreak);
       const bonusMultiplier = calculateBonusMultiplier(streakData.newStreak);
 
       // 4. Create checkin record (within transaction)
       const checkinData = {
         userId,
         checkinDate: new Date(),
-        pointsEarned,
+        pointsEarned: basePoints,
         streakDay: streakData.newStreak,
         bonusMultiplier,
+        adWatched: false, // New field
+        adRewardClaimed: false, // New field
       };
 
       const [newCheckin] = await tx
@@ -75,8 +77,8 @@ export const checkinsService = {
       const [updatedUser] = await tx
         .update(Users)
         .set({
-          points: pointsEarned,
-          totalPoints: user.totalPoints + pointsEarned,
+          points: basePoints,
+          totalPoints: user.totalPoints + basePoints,
           currentStreak: streakData.newStreak,
           longestStreak: Math.max(user.longestStreak, streakData.newStreak),
           lastCheckin: new Date(),
@@ -96,18 +98,97 @@ export const checkinsService = {
             totalPoints: updatedUser.totalPoints,
             currentStreak: updatedUser.currentStreak,
             longestStreak: updatedUser.longestStreak,
-            pointsEarned,
+            pointsEarned: basePoints,
           },
           streakInfo: {
             isNewStreak: streakData.newStreak === 1,
             streakBroken: streakData.streakBroken,
             bonusMultiplier,
           },
+          canWatchAd: true, // Signal frontend to show ad modal
         },
       };
     });
   },
-  // Existing methods...
+
+  processAdReward: async (userId: string, checkinId: string) => {
+    return await db.transaction(async (tx) => {
+      // 1. Validate checkin exists and belongs to user
+      const [checkin] = await tx
+        .select()
+        .from(Checkins)
+        .where(and(eq(Checkins.id, checkinId), eq(Checkins.userId, userId)))
+        .limit(1);
+
+      if (!checkin) {
+        return {
+          success: false,
+          message: "Checkin not found",
+        };
+      }
+
+      if (checkin.adRewardClaimed) {
+        return {
+          success: false,
+          message: "Ad reward already claimed",
+        };
+      }
+
+      // 2. Check if checkin is from today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const checkinDate = new Date(checkin.checkinDate);
+      checkinDate.setHours(0, 0, 0, 0);
+
+      if (checkinDate.getTime() !== today.getTime()) {
+        return {
+          success: false,
+          message: "Can only claim ad reward for today's checkin",
+        };
+      }
+
+      // 3. Calculate additional points (double the original)
+      const additionalPoints = checkin.pointsEarned;
+
+      // 4. Update checkin record
+      await tx
+        .update(Checkins)
+        .set({
+          adWatched: true,
+          adRewardClaimed: true,
+          pointsEarned: checkin.pointsEarned + additionalPoints,
+          updatedAt: new Date(),
+        })
+        .where(eq(Checkins.id, checkinId));
+
+      // 5. Update user points
+      const [user] = await tx
+        .select()
+        .from(Users)
+        .where(eq(Users.id, userId))
+        .limit(1);
+
+      const [updatedUser] = await tx
+        .update(Users)
+        .set({
+          points: user.points + additionalPoints,
+          totalPoints: user.totalPoints + additionalPoints,
+          updatedAt: new Date(),
+        })
+        .where(eq(Users.id, userId))
+        .returning();
+
+      return {
+        success: true,
+        message: "Ad reward applied successfully!",
+        data: {
+          additionalPoints,
+          newTotalPoints: updatedUser.points,
+          newGrandTotal: updatedUser.totalPoints,
+        },
+      };
+    });
+  },
 
   findByUserAndDate: async (
     userId: string,

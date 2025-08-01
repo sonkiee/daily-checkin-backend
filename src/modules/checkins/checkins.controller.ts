@@ -159,6 +159,36 @@ const create = async (req: AuthRequest, res: Response) => {
   }
 };
 
+const completeAdReward = async (req: AuthRequest, res: Response) => {
+  const userId = requireUserId(req, res);
+  if (!userId) return;
+
+  const { checkinId } = req.body;
+
+  try {
+    const result = await checkinsService.processAdReward(userId, checkinId);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: result.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Ad reward applied successfully!",
+      data: result.data,
+    });
+  } catch (error) {
+    console.error("Error processing ad reward:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to process ad reward",
+    });
+  }
+};
+
 const remove = async (req: Request, res: Response) => {
   const { id } = req.params;
 
@@ -232,4 +262,5 @@ export {
   getByUser,
   getUserStreak,
   getTodayStatus,
+  completeAdReward,
 };
