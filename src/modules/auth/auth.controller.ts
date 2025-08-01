@@ -100,11 +100,15 @@ export const login = async (req: Request, res: Response) => {
       deviceId: user.deviceId,
     });
 
-    res.json({
-      user,
-      token,
+    return res.status(200).json({
+      success: true,
+      data: {
+        user,
+        token,
+      },
     });
   } catch (error) {
-    console.log(error);
+    console.error("Access error:", error);
+    return res.status(500).json({ error: "Unable to access user" });
   }
 };
