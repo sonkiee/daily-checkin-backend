@@ -80,3 +80,31 @@ export const create = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const login = async (req: Request, res: Response) => {
+  const { username } = req.body;
+
+  if (!username) {
+    return res.status(400).json({ error: "Username is required" });
+  }
+
+  try {
+    const user = await usersService.findByUsername(username);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const token = jwt.generate({
+      id: user.id,
+      deviceId: user.deviceId,
+    });
+
+    res.json({
+      user,
+      token,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
