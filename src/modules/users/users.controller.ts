@@ -1,38 +1,16 @@
-import { Request, Response } from "express";
-import { NewUser, User } from "./users.schema";
-import { usersService } from "./users.service";
-import jwt from "../../utils/jwt";
+import { Response } from "express";
+import { AuthRequest } from "../../middleware/auth.middleware";
 
-export const create = async (req: Request, res: Response) => {
-  const newUser: NewUser = req.body;
-
-  if (!newUser.deviceId) {
-    return res.status(400).json({ error: "Missing deviceId" });
+export const profile = async (req: AuthRequest, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
   }
 
-  try {
-    const existing = await usersService.findByDeviceId(newUser.deviceId!);
+  const user = req.user;
 
-    if (existing) {
-      return res.status(409).json({ error: "User already exists" });
-    }
-
-    const createdUser: User = await usersService.create(newUser);
-
-    const token = jwt.generate({
-      id: createdUser.id,
-      deviceId: createdUser.deviceId,
-    });
-    res.setHeader("Authorization", `Bearer ${token}`);
-    res.status(201).json({
-      success: true,
-      data: {
-        user: createdUser,
-        token: token,
-      },
-    });
-  } catch (error) {
-    console.error("Error creating user:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
+  return res.status(200).json({
+    data: {
+      user,
+    },
+  });
 };

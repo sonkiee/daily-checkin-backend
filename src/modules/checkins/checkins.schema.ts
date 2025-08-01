@@ -3,7 +3,7 @@ import { integer, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
 import { Users } from "../users/users.schema";
 
 export const Checkins = pgTable("checkins", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")
     .notNull()
     .references(() => Users.id, {

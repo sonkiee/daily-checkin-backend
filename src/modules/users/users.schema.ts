@@ -10,13 +10,15 @@ import {
 
 export const Users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
-  deviceId: varchar("device_id", { length: 64 }).notNull().unique(),
+  username: varchar("username", { length: 256 }).notNull().unique(),
+  deviceId: varchar("device_id", { length: 64 }).notNull(), //
+  points: integer("points").notNull().default(0),
   totalPoints: integer("total_points").notNull().default(0),
   currentStreak: integer("current_streak").notNull().default(0),
   longestStreak: integer("longest_streak").notNull().default(0),
-  lastCheckin: timestamp("last_checkin").notNull(),
+  lastCheckin: timestamp("last_checkin").notNull().defaultNow(),
   isActive: boolean("is_active").notNull().default(true),
-  pushToken: varchar("push_token", { length: 256 }).notNull(),
+  pushToken: varchar("push_token", { length: 256 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

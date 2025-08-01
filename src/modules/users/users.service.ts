@@ -15,6 +15,15 @@ export const usersService = {
     return user ?? null;
   },
 
+  findByUsername: async (username: string): Promise<User | null> => {
+    const [user] = await db
+      .select()
+      .from(Users)
+      .where(eq(Users.username, username));
+
+    return user ?? null;
+  },
+
   findByDeviceId: async (deviceId: string): Promise<User | null> => {
     const [user] = await db
       .select()

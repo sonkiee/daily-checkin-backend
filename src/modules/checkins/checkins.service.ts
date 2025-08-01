@@ -59,7 +59,6 @@ export const checkinsService = {
 
       // 4. Create checkin record (within transaction)
       const checkinData = {
-        id: crypto.randomUUID(),
         userId,
         checkinDate: new Date(),
         pointsEarned,
@@ -76,6 +75,7 @@ export const checkinsService = {
       const [updatedUser] = await tx
         .update(Users)
         .set({
+          points: pointsEarned,
           totalPoints: user.totalPoints + pointsEarned,
           currentStreak: streakData.newStreak,
           longestStreak: Math.max(user.longestStreak, streakData.newStreak),
@@ -92,6 +92,7 @@ export const checkinsService = {
         data: {
           checkin: newCheckin,
           user: {
+            points: updatedUser.points,
             totalPoints: updatedUser.totalPoints,
             currentStreak: updatedUser.currentStreak,
             longestStreak: updatedUser.longestStreak,

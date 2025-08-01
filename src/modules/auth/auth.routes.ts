@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { refreshToken } from "./auth.controller";
+import { create, refreshToken } from "./auth.controller";
 
 const router = Router();
 
 router.post("/refresh", refreshToken);
+router.post("/signup", create);
 
 export default router;
 

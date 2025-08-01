@@ -6,6 +6,7 @@ import {
   getByUser,
   remove,
 } from "./checkins.controller";
+import { authenticate } from "../../middleware/auth.middleware";
 
 const router = Router();
 
@@ -14,7 +15,7 @@ router.get("/:id", getById);
 
 // User-specific (auth required)
 router.get("/user/:userId", getByUser);
-router.post("/", create);
+router.post("/", authenticate, create);
 router.delete("/:id", remove);
 
 export default router;
