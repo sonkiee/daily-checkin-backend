@@ -38,9 +38,9 @@ export const create = async (req: Request, res: Response) => {
     return res.status(400).json({ error: "Missing username or deviceId" });
   }
 
-  if (!pushToken) {
-    return res.status(400).json({ error: "Include push token" });
-  }
+  // if (!pushToken) {
+  //   return res.status(400).json({ error: "Include push token" });
+  // }
   try {
     // let existing: User | null = null;
     // if (deviceId) {
